@@ -4,8 +4,25 @@ const {
   customers,
   revenue,
   users,
+  products,
+  categories,
 } = require('../app/lib/placeholder-data.js');
 const bcrypt = require('bcrypt');
+
+async function dropTables(client) {
+  try {
+    await client.sql`DROP TABLE IF EXISTS product_transactions`;
+    await client.sql`DROP TABLE IF EXISTS products`;
+    await client.sql`DROP TABLE IF EXISTS product_components`;
+    await client.sql`DROP TABLE IF EXISTS revenue`;
+    await client.sql`DROP TABLE IF EXISTS invoices`;
+    await client.sql`DROP TABLE IF EXISTS customers`;
+    await client.sql`DROP TABLE IF EXISTS users`;
+  } catch (error) {
+    console.error('Error dropping tables:', error);
+    throw error;
+  }
+}
 
 async function seedUsers(client) {
   try {
@@ -160,13 +177,121 @@ async function seedRevenue(client) {
   }
 }
 
+async function seedProducts(client) {
+  try {
+    // Create the "products" table if it doesn't exist
+    const createTable = await client.sql`
+CREATE TABLE IF NOT EXISTS products (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  stock INT NOT NULL,
+  price DECIMAL NOT NULL,
+  catalog_number VARCHAR(255) NOT NULL UNIQUE,
+  image_url VARCHAR(255) NOT NULL,
+  category VARCHAR(255) NOT NULL
+);
+`;
+
+    console.log(`Created "products" table`);
+
+    // Insert data into the "products" table
+    const insertedProducts = await Promise.all(
+      products.map(
+        (product) => client.sql`
+        INSERT INTO products (id, name, stock, price, catalog_number, image_url, category)
+        VALUES (${product.id}, ${product.name}, ${product.stock}, ${product.price}, ${product.catalog_number}, ${product.image_url}, ${product.category})
+        ON CONFLICT (id) DO NOTHING;
+      `,
+      ),
+    );
+
+    console.log(`Seeded ${insertedProducts.length} products`);
+
+    return {
+      createTable,
+      products: insertedProducts,
+    };
+  } catch (error) {
+    console.error('Error seeding products:', error);
+    throw error;
+  }
+}
+
+async function seedProductsComponents(client) {
+  try {
+    // Create the "products_components" table if it doesn't exist
+    const createTable = await client.sql`
+CREATE TABLE IF NOT EXISTS product_components (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  product_id UUID REFERENCES products(id),
+  component_id VARCHAR(255) NOT NULL,
+  component_name VARCHAR(255) NOT NULL,
+  quantity INT NOT NULL,
+);
+`;
+
+    console.log(`Created "products_components" table`);
+
+    // Insert data into the "products" table
+    const insertedComponents = await Promise.all(
+      products.flatMap((product) =>
+        product.components && product.components.length > 0
+          ? product.components.map(
+              (component) => client.sql`
+            INSERT INTO product_components (id, product_id, component_id, component_name, quantity)
+            VALUES (uuid_generate_v4(), ${product.id}, ${component.id}, ${component.name}, ${component.quantity})
+            ON CONFLICT (id) DO NOTHING;
+          `,
+            )
+          : [],
+      ),
+    );
+
+    return {
+      createTable,
+      components: insertedComponents,
+    };
+  } catch (error) {
+    console.error('Error seeding product components:', error);
+    throw error;
+  }
+}
+
+async function seedProductTransactions(client) {
+  try {
+    // Create the "product_transactions" table if it doesn't exist
+    const createTable = await client.sql`
+      CREATE TABLE IF NOT EXISTS product_transactions (
+        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+        product_id UUID NOT NULL,
+        transaction_type VARCHAR(255) NOT NULL,
+        quantity INT NOT NULL,
+        date DATE NOT NULL
+      );
+    `;
+
+    console.log(`Created "product_transactions" table`);
+
+    return {
+      createTable,
+    };
+  } catch (error) {
+    console.error('Error seeding product transactions:', error);
+    throw error;
+  }
+}
+
 async function main() {
   const client = await db.connect();
 
+  // await dropTables(client);
   await seedUsers(client);
   await seedCustomers(client);
   await seedInvoices(client);
   await seedRevenue(client);
+  await seedProducts(client);
+  await seedProductsComponents(client);
+  await seedProductTransactions(client);
 
   await client.end();
 }

@@ -180,9 +180,118 @@ const revenue = [
   { month: 'Dec', revenue: 4800 },
 ];
 
+const products = [
+  {
+    id: '033c3773-fca0-4582-97bc-43c6a8358b5f',
+    name: 'śrubka',
+    price: 2.99,
+    image_url: '/products/screw.png',
+    catalog_number: 'SCREW-001',
+    stock: 100,
+    category: 'hardware',
+    components: [],
+  },
+  {
+    id: '5ea6a6d7-ab73-4ff6-9c34-dfd28b6d7322',
+    name: 'nakrętka',
+    price: 1.99,
+    image_url: '/products/nut.png',
+    catalog_number: 'NUT-001',
+    stock: 100,
+    category: 'hardware',
+    components: [],
+  },
+  {
+    id: '15b23728-6272-41b7-9f83-26a9ebeec798',
+    name: 'śruba z nakrętką',
+    price: 3.99,
+    image_url: '/products/screw-nut.png',
+    catalog_number: 'SCREW-NUT-001',
+    stock: 100,
+    category: 'hardware',
+    components: [
+      {
+        id: '033c3773-fca0-4582-97bc-43c6a8358b5f',
+        name: 'śrubka',
+        quantity: 1,
+      },
+      {
+        id: '5ea6a6d7-ab73-4ff6-9c34-dfd28b6d7322',
+        name: 'nakrętka',
+        quantity: 1,
+      },
+    ],
+  },
+  {
+    id: 'f63b8898-57ce-4599-b4b8-bdfa08f33bda',
+    name: 'płaskownik perfrowany',
+    price: 15.99,
+    image_url: '/products/perforated-flat-bar.png',
+    catalog_number: 'PFB-001',
+    stock: 100,
+    category: 'metal',
+    components: [
+      {
+        id: '15b23728-6272-41b7-9f83-26a9ebeec798',
+        name: 'śruba z nakrętką',
+        quantity: 4,
+      },
+    ],
+  },
+  {
+    id: '5f66a23b-212b-4fe3-a32d-a734ac603060',
+    name: 'kątownik',
+    price: 10.99,
+    image_url: '/products/angle-bar.png',
+    catalog_number: 'AB-001',
+    stock: 100,
+    category: 'metal',
+    components: [
+      {
+        id: '15b23728-6272-41b7-9f83-26a9ebeec798',
+        name: 'śruba z nakrętką',
+        quantity: 2,
+      },
+    ],
+  },
+  {
+    id: '06cedb24-768b-43f5-9eca-89099c9f6cb2',
+    name: 'zestaw wspierający z montażem',
+    price: 25.99,
+    image_url: '/products/support-kit.png',
+    catalog_number: 'RB-001',
+    stock: 100,
+    category: 'support',
+    components: [
+      {
+        id: 'f63b8898-57ce-4599-b4b8-bdfa08f33bda',
+        name: 'płaskownik perfrowany',
+        quantity: 2,
+      },
+      {
+        id: '5f66a23b-212b-4fe3-a32d-a734ac603060',
+        name: 'kątownik',
+        quantity: 4,
+      },
+      {
+        id: '15b23728-6272-41b7-9f83-26a9ebeec798',
+        name: 'śruba z nakrętką',
+        quantity: 12,
+      },
+    ],
+  },
+];
+
+const categories = [
+  { id: 'hardware', name: 'hardware' },
+  { id: 'metal', name: 'metal' },
+  { id: 'support', name: 'support' },
+];
+
 module.exports = {
   users,
   customers,
   invoices,
   revenue,
+  products,
 };
