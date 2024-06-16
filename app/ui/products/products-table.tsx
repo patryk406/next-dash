@@ -1,10 +1,11 @@
 import Image from 'next/image';
-import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons';
-import InvoiceStatus from '@/app/ui/invoices/status';
-import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
+import { UpdateButton, DeleteButton } from '@/app/ui/common/buttons';
+import { formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredProducts } from '@/app/lib/data';
+import TableLinkElement from '@/app/ui/products/table-link-element';
+import { deleteProduct } from '@/app/lib/actions';
 
-export default async function InvoicesTable({
+export default async function ProductTable({
   query,
   currentPage,
 }: {
@@ -13,7 +14,6 @@ export default async function InvoicesTable({
 }) {
   const products = await fetchFilteredProducts(query, currentPage);
 
-  console.log(products[3].components);
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
@@ -28,7 +28,7 @@ export default async function InvoicesTable({
                   <div>
                     <div className="mb-2 flex items-center">
                       <Image
-                        src={product.image_url}
+                        src="/products/placeholder.png"
                         className="mr-2 rounded-full"
                         width={28}
                         height={28}
@@ -37,18 +37,21 @@ export default async function InvoicesTable({
                       <p>{product.name}</p>
                     </div>
                     <p className="text-sm text-gray-500">{product.stock}</p>
+                    <p className="text-sm text-gray-500">{product.sector}</p>
+                    <p className="text-sm text-gray-500">{product.category}</p>
                   </div>
                 </div>
                 <div className="flex w-full items-center justify-between pt-4">
                   <div>
-                    <p className="text-xl font-medium">
-                      {formatCurrency(product.price)}
-                    </p>
-                    <p>{product.catalog_number}</p>
+                    <p className="text-xl font-medium">{product.price}</p>
+                    <p>{product.catalog_number}</p>€
                   </div>
                   <div className="flex justify-end gap-2">
-                    <UpdateInvoice id={product.id} />
-                    <DeleteInvoice id={product.id} />
+                    <UpdateButton id={product.id} location="products" />
+                    <DeleteButton
+                      id={product.id}
+                      deleteActionParam={deleteProduct}
+                    />
                   </div>
                 </div>
               </div>
@@ -65,6 +68,12 @@ export default async function InvoicesTable({
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   Price
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Sector
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Category
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   Catalog ID
@@ -84,19 +93,27 @@ export default async function InvoicesTable({
                   className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                 >
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                    <div className="flex items-center gap-3">
-                      <Image
-                        src={product.image_url}
-                        className="rounded-full"
-                        width={28}
-                        height={28}
-                        alt={`${product.name}'s profile picture`}
-                      />
-                      <p>{product.name}</p>
-                    </div>
+                    <TableLinkElement id={product.id}>
+                      <div className="flex items-center gap-3">
+                        <Image
+                          src="/products/placeholder.png"
+                          className="rounded-full"
+                          width={28}
+                          height={28}
+                          alt={`${product.name}'s profile picture`}
+                        />
+                        <p>{product.name}</p>
+                      </div>
+                    </TableLinkElement>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     {product.stock}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {product.sector}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {product.category}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     {formatCurrency(product.price)}
@@ -117,8 +134,11 @@ export default async function InvoicesTable({
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
-                      <UpdateInvoice id={product.id} />
-                      <DeleteInvoice id={product.id} />
+                      <UpdateButton id={product.id} location="products" />
+                      <DeleteButton
+                        id={product.id}
+                        deleteActionParam={deleteProduct}
+                      />
                     </div>
                   </td>
                 </tr>
