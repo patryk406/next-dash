@@ -1,205 +1,21 @@
 import { sql } from '@vercel/postgres';
 import { unstable_noStore as noStore } from 'next/cache';
 
-import {
-  InvoiceForm,
-  InvoicesTable,
-  LatestInvoiceRaw,
-  User,
-  Revenue,
-  ProductsTableType,
-  ProductTransactionsTableType,
-} from './definitions';
-
-import { formatCurrency } from './utils';
+import { Product, Sector, Transaction, User } from './definitions';
 
 const ITEMS_PER_PAGE = 6;
-
-export async function fetchRevenue() {
-  // Add noStore() here to prevent the response from being cached.
-  // This is equivalent to in fetch(..., {cache: 'no-store'}).
-  noStore();
-
-  try {
-    // Artificially delay a response for demo purposes.
-    // Don't do this in production :)
-
-    console.log('Fetching revenue data...');
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    const data = await sql<Revenue>`SELECT * FROM revenue`;
-
-    console.log('Data fetch completed after 3 seconds.');
-
-    return data.rows;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch revenue data.');
-  }
-}
-
-export async function fetchLatestInvoices() {
-  noStore();
-  try {
-    const data = await sql<LatestInvoiceRaw>`
-      SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
-      FROM invoices
-      JOIN customers ON invoices.customer_id = customers.id
-      ORDER BY invoices.date DESC
-      LIMIT 5`;
-
-    const latestInvoices = data.rows.map((invoice) => ({
-      ...invoice,
-      amount: formatCurrency(invoice.amount),
-    }));
-    return latestInvoices;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch the latest invoices.');
-  }
-}
-
-export async function fetchCardData() {
-  noStore();
-  try {
-    // You can probably combine these into a single SQL query
-    // However, we are intentionally splitting them to demonstrate
-    // how to initialize multiple queries in parallel with JS.
-    const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
-    const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
-    const invoiceStatusPromise = sql`SELECT
-         SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
-         SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
-         FROM invoices`;
-
-    const data = await Promise.all([
-      invoiceCountPromise,
-      customerCountPromise,
-      invoiceStatusPromise,
-    ]);
-
-    const numberOfInvoices = Number(data[0].rows[0].count ?? '0');
-    const numberOfCustomers = Number(data[1].rows[0].count ?? '0');
-    const totalPaidInvoices = formatCurrency(data[2].rows[0].paid ?? '0');
-    const totalPendingInvoices = formatCurrency(data[2].rows[0].pending ?? '0');
-
-    return {
-      numberOfCustomers,
-      numberOfInvoices,
-      totalPaidInvoices,
-      totalPendingInvoices,
-    };
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch card data.');
-  }
-}
-
-// invoices data
-export async function fetchFilteredInvoices(
-  query: string,
-  currentPage: number,
-) {
-  noStore();
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-
-  try {
-    const invoices = await sql<InvoicesTable>`
-      SELECT
-        invoices.id,
-        invoices.amount,
-        invoices.date,
-        invoices.status,
-        customers.name,
-        customers.email,
-        customers.image_url
-      FROM invoices
-      JOIN customers ON invoices.customer_id = customers.id
-      WHERE
-        customers.name ILIKE ${`%${query}%`} OR
-        customers.email ILIKE ${`%${query}%`} OR
-        invoices.amount::text ILIKE ${`%${query}%`} OR
-        invoices.date::text ILIKE ${`%${query}%`} OR
-        invoices.status ILIKE ${`%${query}%`}
-      ORDER BY invoices.date DESC
-      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
-    `;
-
-    return invoices.rows;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch invoices.');
-  }
-}
-
-export async function fetchInvoicesPages(query: string) {
-  noStore();
-  try {
-    const count = await sql`SELECT COUNT(*)
-    FROM invoices
-    JOIN customers ON invoices.customer_id = customers.id
-    WHERE
-      customers.name ILIKE ${`%${query}%`} OR
-      customers.email ILIKE ${`%${query}%`} OR
-      invoices.amount::text ILIKE ${`%${query}%`} OR
-      invoices.date::text ILIKE ${`%${query}%`} OR
-      invoices.status ILIKE ${`%${query}%`}
-  `;
-
-    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
-    return totalPages;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch total number of invoices.');
-  }
-}
-
-export async function fetchInvoiceById(id: string) {
-  noStore();
-  try {
-    const data = await sql<InvoiceForm>`
-      SELECT
-        invoices.id,
-        invoices.customer_id,
-        invoices.amount,
-        invoices.status
-      FROM invoices
-      WHERE invoices.id = ${id};
-    `;
-
-    const invoice = data.rows.map((invoice) => ({
-      ...invoice,
-      // Convert amount from cents to dollars
-      amount: invoice.amount / 100,
-    }));
-    console.log(invoice);
-    return invoice[0];
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch invoice.');
-  }
-}
-// end of invoices data
-
 // products data
+
 export async function fetchProduct(id: string) {
   noStore();
   try {
-    const product = await sql<ProductsTableType>`
-        SELECT products.*, coalesce(jsonb_agg(product_components) FILTER (WHERE product_components.product_id IS NOT NULL), '[]') as components
+    const product = await sql<Product>`
+        SELECT *
         FROM products
-        LEFT JOIN product_components ON products.id = product_components.product_id
         WHERE products.id = ${id}
-        GROUP BY products.id
         `;
-
-    const transactions = await sql<ProductTransactionsTableType>`
-        SELECT * FROM product_transactions WHERE product_id = ${id}
-        `;
-
     return {
       product: product.rows[0],
-      transactions: transactions.rows,
     };
   } catch (error) {
     console.error('Database Error:', error);
@@ -232,12 +48,10 @@ export async function fetchFilteredProducts(
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    const products = await sql<ProductsTableType>`
-        SELECT products.*, coalesce(jsonb_agg(product_components) FILTER (WHERE product_components.product_id IS NOT NULL), '[]') as components
+    const products = await sql<Product>`
+        SELECT *
         FROM products
-        LEFT JOIN product_components ON products.id = product_components.product_id
         WHERE products.name ILIKE ${`%${query}%`}
-        GROUP BY products.id
         ORDER BY products.name ASC
         LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
         `;
@@ -260,7 +74,7 @@ export async function fetchProducts() {
     throw new Error('Failed to fetch products.');
   }
 }
-// end of invoices data
+// end of products data
 
 // transactions data
 export async function fetchTransactionsPages(query: string) {
@@ -288,7 +102,7 @@ export async function fetchFilteredTransactions(
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    const transactions = await sql<ProductTransactionsTableType>`
+    const transactions = await sql<Transaction>`
             SELECT * FROM product_transactions
             WHERE product_name ILIKE ${`%${query}%`}
             ORDER BY date DESC
@@ -302,6 +116,8 @@ export async function fetchFilteredTransactions(
   }
 }
 // end of transactions data
+// sectors data
+
 // sectors data
 export async function fetchSectorsPages(query: string) {
   noStore();
@@ -320,7 +136,7 @@ export async function fetchSectors(query: string, currentPage: number) {
   noStore();
   try {
     const sectors =
-      await sql`SELECT id, name, description FROM sectors ORDER BY name ASC`;
+      await sql<Sector>`SELECT id, name, description FROM sectors ORDER BY name ASC`;
     return sectors.rows;
   } catch (error) {
     console.error('Database Error:', error);
@@ -340,7 +156,6 @@ export async function fetchFilteredSectors(query: string, currentPage: number) {
     throw new Error('Failed to fetch sectors.');
   }
 }
-
 // end of sectors data
 
 // categories data
@@ -386,7 +201,55 @@ export async function fetchFilteredCategories(
     throw new Error('Failed to fetch categories.');
   }
 }
+// end of categories data
+// users data
 
+// suppliers data
+export async function fetchSuppliersPages(query: string) {
+  noStore();
+  try {
+    const count =
+      await sql`SELECT COUNT(*) FROM suppliers WHERE name ILIKE ${`%${query}%`}`;
+
+    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of suppliers.');
+  }
+}
+
+export async function fetchSuppliers(query: string) {
+  noStore();
+  try {
+    const suppliers =
+      await sql`SELECT id, name, description FROM suppliers ORDER BY name ASC`;
+    return suppliers.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch suppliers.');
+  }
+}
+
+export async function fetchFilteredSuppliers(
+  query: string,
+  currentPage: number,
+) {
+  noStore();
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  try {
+    const suppliers =
+      await sql`SELECT id, name, description FROM suppliers WHERE name ILIKE ${`%${query}%`} ORDER BY name ASC LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}`;
+    return suppliers.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch suppliers.');
+  }
+}
+// end of suppliers data
+
+// users data
 export async function getUser(email: string) {
   try {
     const user = await sql`SELECT * FROM users WHERE email=${email}`;
@@ -396,3 +259,4 @@ export async function getUser(email: string) {
     throw new Error('Failed to fetch user.');
   }
 }
+// end of users data

@@ -7,10 +7,10 @@ import { useFormState } from 'react-dom';
 // components
 import { Button } from '@/app/ui/button';
 // utility
-import { createSector } from '@/app/lib/actions';
+import { createSector, SectorState } from '@/app/lib/actions';
 
 export default function Form() {
-  const initialState = { message: null, errors: {} };
+  const initialState: SectorState = { message: null, errors: {} };
   const [state, dispatch] = useFormState(createSector, initialState);
 
   return (
@@ -26,7 +26,7 @@ export default function Form() {
               id="name"
               name="name"
               type="text"
-              placeholder="Enter product name"
+              placeholder="Enter sector name"
               className="peer block w-full rounded-md border border-gray-200 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
               defaultValue=""
               aria-describedby="name-error"

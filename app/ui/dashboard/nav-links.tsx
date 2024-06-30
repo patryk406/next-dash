@@ -10,13 +10,16 @@ import {
   ListBulletIcon,
   RectangleGroupIcon,
   MapPinIcon,
+  ShoppingBagIcon,
+  CubeTransparentIcon,
 } from '@heroicons/react/24/outline';
 
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
 const links = [
   { name: 'Home', href: '/dashboard', icon: HomeIcon },
-  { name: 'Products', href: '/dashboard/products', icon: CubeIcon },
+  { name: 'Products', href: '/dashboard/products', icon: CubeTransparentIcon },
+  { name: 'Product Sets', href: '/dashboard/sets', icon: CubeIcon },
   {
     name: 'Transactions',
     href: '/dashboard/transactions',
@@ -27,6 +30,11 @@ const links = [
     name: 'Product Categories',
     href: '/dashboard/categories',
     icon: RectangleGroupIcon,
+  },
+  {
+    name: 'Suppliers',
+    href: '/dashboard/suppliers',
+    icon: ShoppingBagIcon,
   },
 ];
 

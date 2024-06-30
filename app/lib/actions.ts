@@ -6,113 +6,28 @@ import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 
-// invoices section
-// const InvoiceFormSchema = z.object({
-//   id: z.string(),
-//   customerId: z.string({
-//     invalid_type_error: 'Please select a customer.',
-//   }),
-//   amount: z.coerce
-//     .number()
-//     .gt(0, { message: 'Please enter an amount greater than $0.' }),
-//   status: z.enum(['pending', 'paid'], {
-//     invalid_type_error: 'Please select an invoice status.',
-//   }),
-//   date: z.string(),
-// });
-//
-// const CreateInvoice = InvoiceFormSchema.omit({ id: true, date: true });
-// const UpdateInvoice = InvoiceFormSchema.omit({ id: true, date: true });
-//
-// export async function createInvoice(prevState: State, formData: FormData) {
-//   const validatedFields = CreateInvoice.safeParse({
-//     customerId: formData.get('customerId'),
-//     amount: formData.get('amount'),
-//     status: formData.get('status'),
-//   });
-//
-//   if (!validatedFields.success) {
-//     return {
-//       errors: validatedFields.error.flatten().fieldErrors,
-//       message: 'Missing Fields. Failed to Create Invoice.',
-//     };
-//   }
-//   const { customerId, amount, status } = validatedFields.data;
-//   const amountInCents = amount * 100;
-//   const date = new Date().toISOString().split('T')[0];
-//
-//   try {
-//     await sql`
-//     INSERT INTO invoices (customer_id, amount, status, date)
-//     VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-//   `;
-//
-//     revalidatePath('/dashboard/invoices');
-//     redirect('/dashboard/invoices');
-//   } catch (error) {
-//     return {
-//       message: 'Database Error: Failed to Create Invoice.',
-//     };
-//   }
-// }
-//
-// export async function updateInvoice(
-//   id: string,
-//   prevState: State,
-//   formData: FormData,
-// ) {
-//   const validatedFields = UpdateInvoice.safeParse({
-//     customerId: formData.get('customerId'),
-//     amount: formData.get('amount'),
-//     status: formData.get('status'),
-//   });
-//
-//   if (!validatedFields.success) {
-//     return {
-//       errors: validatedFields.error.flatten().fieldErrors,
-//       message: 'Missing Fields. Failed to Update Invoice.',
-//     };
-//   }
-//
-//   const { customerId, amount, status } = validatedFields.data;
-//   const amountInCents = amount * 100;
-//
-//   try {
-//     await sql`
-//       UPDATE invoices
-//       SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
-//       WHERE id = ${id}
-//     `;
-//   } catch (error) {
-//     return { message: 'Database Error: Failed to Update Invoice.' };
-//   }
-//
-//   revalidatePath('/dashboard/invoices');
-//   redirect('/dashboard/invoices');
-// }
-//
-// export async function deleteInvoice(id: string) {
-//   try {
-//     await sql`DELETE FROM invoices WHERE id = ${id}`;
-//     revalidatePath('/dashboard/invoices');
-//     return { message: 'Invoice Deleted.' };
-//   } catch (error) {
-//     return {
-//       message: 'Database Error: Failed to Delete Invoice.',
-//     };
-//   }
-// }
-// end of invoices section
-
 // products section
 export type ProductState = {
   errors?: {
     name?: string[];
+    description?: string[];
     price?: string[];
     stock?: string[];
-    sectorId?: string[];
-    categoryId?: string[];
-    catalogNumber?: string[];
+    min_stock?: string[];
+    max_stock?: string[];
+    location?: string[];
+    height?: string[];
+    width?: string[];
+    depth?: string[];
+    supplier?: string[];
+    weight?: string[];
+    category?: string[];
+    sku_code?: string[];
+    qr_code?: string[];
+    manufacturer?: string[];
+    manufacturer_part_number?: string[];
+    temporary_locked?: string[];
+    substitute?: string[];
   };
   message?: string | null;
 };
@@ -120,20 +35,22 @@ export type ProductState = {
 const ProductFormSchema = z.object({
   id: z.string(),
   name: z.string(),
-  price: z.coerce
-    .number()
-    .gt(0, { message: 'Please enter a price greater than $0.' }),
-  stock: z.coerce.number(),
-  catalogNumber: z.string(),
-  sector: z.string(),
+  description: z.string(),
+  substitute: z.string(),
+  price: z.number(),
+  stock: z.number(),
+  min_stock: z.number(),
+  max_stock: z.number(),
+  location: z.string(),
+  height: z.number(),
+  width: z.number(),
+  depth: z.number(),
+  supplier: z.string(),
+  weight: z.number(),
   category: z.string(),
-  mainImage: z.string() || null,
-  images: z.array(z.string()) || null,
-  status: z.enum(['active', 'disabled'], {
-    invalid_type_error: 'Please select a product status.',
-  }),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
+  sku_code: z.string(),
+  manufacturer: z.string(),
+  manufacturer_part_number: z.string(),
 });
 
 const CreateProduct = ProductFormSchema.omit({ id: true });
@@ -143,19 +60,28 @@ export async function createProduct(
   prevState: ProductState,
   formData: FormData,
 ) {
+  console.log('Before validation', formData);
   const validatedFields = CreateProduct.safeParse({
     name: formData.get('name'),
-    price: formData.get('price'),
-    stock: formData.get('stock'),
-    catalogNumber: formData.get('catalogNumber'),
-    sector: formData.get('sector'),
+    description: formData.get('description'),
+    substitute: formData.get('substitute'),
+    price: Number(formData.get('price')),
+    stock: Number(formData.get('stock')),
+    min_stock: parseInt(formData.get('min_stock') as string),
+    max_stock: parseInt(formData.get('max_stock') as string),
+    location: formData.get('location'),
+    height: Number(formData.get('height')),
+    width: Number(formData.get('width')),
+    depth: Number(formData.get('depth')),
+    supplier: formData.get('supplier'),
+    weight: Number(formData.get('weight')),
     category: formData.get('category'),
-    mainImage: formData.get('mainImage'),
-    images: formData.getAll('images'),
-    status: formData.get('status'),
+    sku_code: formData.get('sku_code'),
+    manufacturer: formData.get('manufacturer'),
+    manufacturer_part_number: formData.get('manufacturer_part_number'),
   });
-
   if (!validatedFields.success) {
+    console.log('Validation failed', validatedFields.error);
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Missing Fields. Failed to Create Product.',
@@ -164,33 +90,39 @@ export async function createProduct(
 
   const {
     name,
+    description,
     price,
     stock,
-    catalogNumber,
+    substitute,
+    min_stock,
+    max_stock,
+    location,
+    height,
+    width,
+    depth,
+    supplier,
+    weight,
     category,
-    sector,
-    images,
-    mainImage,
-    status,
+    sku_code,
+    manufacturer,
+    manufacturer_part_number,
   } = validatedFields.data;
 
-  console.log('validatedFields', validatedFields.data);
-
   try {
-    console.log('validatedFields', validatedFields.data);
-    // await sql`
-    //   INSERT INTO products (name, price, stock, catalog_number, created_at, updated_at, sector_id, category_id, status)
-    //   VALUES (${name}, ${price}, ${stock}, ${catalogNumber}, NOW(), NOW(), ${sector}, ${category}, ${mainImage}, ${status})
-    // `;
-    //
-    // revalidatePath('/dashboard/products');
-    // redirect('/dashboard/products');
+    await sql`
+      INSERT INTO products (name, description, substitute, price, stock, min_stock, max_stock, location_id, height, width, depth, supplier_id, weight, category_id, sku_code, manufacturer, manufacturer_part_number, temporary_locked)
+      VALUES (${name}, ${description}, ${substitute}, ${price}, ${stock}, ${min_stock}, ${max_stock}, ${location}, ${height}, ${width}, ${depth}, ${supplier}, ${weight}, ${category}, ${sku_code}, ${manufacturer}, ${manufacturer_part_number}, 0)
+    `;
+
+    console.log('After SQL query');
   } catch (error) {
-    console.log('validatedFields', validatedFields.data);
+    console.error('Error caught', error);
     return {
       message: 'Database Error: Failed to Create Product.',
     };
   }
+  revalidatePath('/dashboard/products');
+  redirect('/dashboard/products');
 }
 
 export async function updateProduct(
@@ -273,22 +205,19 @@ export async function createSector(prevState: SectorState, formData: FormData) {
       message: 'Missing Fields. Failed to Create Sector.',
     };
   }
-
   const { name, description } = validatedFields.data;
-
   try {
     await sql`
       INSERT INTO sectors (name, description)
       VALUES (${name}, ${description})
     `;
-
-    revalidatePath('/dashboard/sectors');
-    redirect('/dashboard/sectors');
   } catch (error) {
     return {
       message: 'Database Error: Failed to Create Sector.',
     };
   }
+  revalidatePath('/dashboard/sectors');
+  redirect('/dashboard/sectors');
 }
 
 export async function updateSector(
@@ -378,12 +307,26 @@ export async function createCategory(
       INSERT INTO categories (name, description)
       VALUES (${name}, ${description})
     `;
-
-    revalidatePath('/dashboard/categories');
-    redirect('/dashboard/categories');
   } catch (error) {
     return {
       message: 'Database Error: Failed to Create Category.',
+    };
+  }
+
+  revalidatePath('/dashboard/categories');
+  redirect('/dashboard/categories');
+}
+
+export async function fetchCategory(id: string) {
+  try {
+    const category = await sql`
+        SELECT * FROM categories WHERE id = ${id}
+        `;
+
+    return { category };
+  } catch (error) {
+    return {
+      message: 'Database Error: Failed to Fetch Category.',
     };
   }
 }
@@ -433,6 +376,105 @@ export async function deleteCategory(id: string) {
     };
   }
 }
+// end of categories section
+
+// suppliers section
+export type SupplierState = {
+  errors?: {
+    name?: string[];
+    description?: string[];
+  };
+  message?: string | null;
+};
+
+const SupplierFormSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+});
+
+const CreateSupplier = SupplierFormSchema.omit({ id: true });
+const UpdateSupplier = SupplierFormSchema.omit({ id: true });
+
+export async function createSupplier(
+  prevState: SupplierState,
+  formData: FormData,
+) {
+  const validatedFields = CreateSupplier.safeParse({
+    name: formData.get('name'),
+    description: formData.get('description'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Create Supplier.',
+    };
+  }
+
+  const { name, description } = validatedFields.data;
+
+  try {
+    await sql`
+      INSERT INTO suppliers (name, description)
+      VALUES (${name}, ${description})
+    `;
+  } catch (error) {
+    return {
+      message: 'Database Error: Failed to Create Supplier.',
+    };
+  }
+
+  revalidatePath('/dashboard/suppliers');
+  redirect('/dashboard/suppliers');
+}
+
+export async function updateSupplier(
+  id: string,
+  prevState: SupplierState,
+  formData: FormData,
+) {
+  const validatedFields = UpdateSupplier.safeParse({
+    name: formData.get('name'),
+    description: formData.get('description'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Update Supplier.',
+    };
+  }
+
+  const { name, description } = validatedFields.data;
+
+  try {
+    await sql`
+      UPDATE suppliers
+      SET name = ${name}, description = ${description}
+      WHERE id = ${id}
+    `;
+  } catch (error) {
+    return { message: 'Database Error: Failed to Update Supplier.' };
+  }
+
+  revalidatePath('/dashboard/suppliers');
+  redirect('/dashboard/suppliers');
+}
+
+export async function deleteSupplier(id: string) {
+  try {
+    await sql`DELETE FROM suppliers WHERE id = ${id}`;
+    revalidatePath('/dashboard/suppliers');
+    return { message: 'Supplier Deleted.' };
+  } catch (error) {
+    return {
+      message: 'Database Error: Failed to Delete Supplier.',
+    };
+  }
+}
+
+// end of suppliers section
 
 // authentication section
 export async function authenticate(

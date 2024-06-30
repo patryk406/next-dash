@@ -7,11 +7,11 @@ import { useFormState } from 'react-dom';
 // components
 import { Button } from '@/app/ui/button';
 // utility
-import { createCategory, CategoryState } from '@/app/lib/actions';
+import { createSupplier, SupplierState } from '@/app/lib/actions';
 
 export default function Form() {
-  const initialState: CategoryState = { message: null, errors: {} };
-  const [state, dispatch] = useFormState(createCategory, initialState);
+  const initialState: SupplierState = { message: null, errors: {} };
+  const [state, dispatch] = useFormState(createSupplier, initialState);
 
   return (
     <form action={dispatch}>
@@ -19,14 +19,14 @@ export default function Form() {
         {/* Product Name */}
         <div className="mb-4">
           <label htmlFor="name" className="mb-2 block text-sm font-medium">
-            Category Name
+            Supplier Name
           </label>
           <div className="relative mt-2 rounded-md">
             <input
               id="name"
               name="name"
               type="text"
-              placeholder="Enter product name"
+              placeholder="Enter supplier name"
               className="peer block w-full rounded-md border border-gray-200 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
               defaultValue=""
               aria-describedby="name-error"
@@ -43,14 +43,14 @@ export default function Form() {
         </div>
         <div className="mb-4">
           <label htmlFor="name" className="mb-2 block text-sm font-medium">
-            Category Description
+            Supplier Description
           </label>
           <div className="relative mt-2 rounded-md">
             <input
               id="description"
               name="description"
               type="text"
-              placeholder="Enter sector description"
+              placeholder="Enter supplier description"
               className="peer block w-full rounded-md border border-gray-200 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
               defaultValue=""
               aria-describedby="description-error"
@@ -70,7 +70,7 @@ export default function Form() {
       </div>
       <div className="mt-6 flex justify-end gap-4">
         <Link
-          href="/dashboard/categories"
+          href="/dashboard/suppliers"
           className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
         >
           Cancel

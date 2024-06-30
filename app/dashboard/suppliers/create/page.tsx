@@ -1,4 +1,4 @@
-import Form from '@/app/ui/sectors/create-form';
+import Form from '@/app/ui/suppliers/create-form';
 import Breadcrumbs from '@/app/ui/common/breadcrumbs';
 
 export default async function Page() {
@@ -6,9 +6,9 @@ export default async function Page() {
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: 'Sectors', href: '/dashboard/sectors' },
+          { label: 'Suppliers', href: '/dashboard/suppliers' },
           {
-            label: 'Create Sector',
+            label: 'Create Supplier',
             href: '/dashboard/sectors/create',
             active: true,
           },

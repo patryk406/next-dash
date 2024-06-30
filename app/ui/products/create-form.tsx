@@ -2,38 +2,28 @@
 // from next
 import Link from 'next/link';
 
-// from react
-import { useState } from 'react';
+// from framework
 import { useFormState } from 'react-dom';
 // components
 import { Button } from '@/app/ui/button';
 // utility
-import {
-  CategoriesTableType,
-  ProductsTableType,
-  SectorTableType,
-} from '@/app/lib/definitions';
-import { createProduct } from '@/app/lib/actions';
-import ProductComponentsField from '@/app/ui/products/components-field';
-import { CheckIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { Category, Sector, Supplier } from '@/app/lib/definitions';
+import { createProduct, ProductState } from '@/app/lib/actions';
 
 export default function Form({
-  products,
+  suppliers,
   categories,
   sectors,
 }: {
-  products: ProductsTableType[];
-  categories: CategoriesTableType[];
-  sectors: SectorTableType[];
+  suppliers: Supplier[];
+  categories: Category[];
+  sectors: Sector[];
 }) {
-  const initialState = { message: null, errors: {} };
+  const initialState: ProductState = { message: null, errors: {} };
   const [state, dispatch] = useFormState(createProduct, initialState);
-  const [selectedComponents, setSelectedComponents] = useState<
-    { name: string; quantity: number }[]
-  >([]);
 
   return (
-    <form onSubmit={dispatch}>
+    <form action={dispatch}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Product Name */}
         <div className="mb-4">
@@ -61,6 +51,34 @@ export default function Form({
           </div>
         </div>
 
+        {/* Product Description */}
+        <div className="mb-4">
+          <label
+            htmlFor="description"
+            className="mb-2 block text-sm font-medium"
+          >
+            Product Description
+          </label>
+          <div className="relative mt-2 rounded-md">
+            <textarea
+              id="description"
+              name="description"
+              placeholder="Enter product description"
+              className="peer block w-full rounded-md border border-gray-200 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              defaultValue=""
+              aria-describedby="description-error"
+            />
+          </div>
+          <div id="description-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.description &&
+              state.errors.description.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
+
         {/* Product Stock */}
         <div className="mb-4">
           <label htmlFor="stock" className="mb-2 block text-sm font-medium">
@@ -80,6 +98,58 @@ export default function Form({
           <div id="stock-error" aria-live="polite" aria-atomic="true">
             {state.errors?.stock &&
               state.errors.stock.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
+
+        {/* Product Min Stock */}
+        <div className="mb-4">
+          <label htmlFor="stock" className="mb-2 block text-sm font-medium">
+            Product Min Stock
+          </label>
+          <div className="relative mt-2 rounded-md">
+            <input
+              id="min_stock"
+              name="min_stock"
+              type="number"
+              placeholder="Enter min product stock"
+              className="peer block w-full rounded-md border border-gray-200 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              defaultValue=""
+              aria-describedby="stock-error"
+            />
+          </div>
+          <div id="stock-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.min_stock &&
+              state.errors.min_stock.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
+
+        {/* Product Max Stock */}
+        <div className="mb-4">
+          <label htmlFor="stock" className="mb-2 block text-sm font-medium">
+            Product Max Stock
+          </label>
+          <div className="relative mt-2 rounded-md">
+            <input
+              id="max_stock"
+              name="max_stock"
+              type="number"
+              placeholder="Enter max product stock"
+              className="peer block w-full rounded-md border border-gray-200 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              defaultValue=""
+              aria-describedby="stock-error"
+            />
+          </div>
+          <div id="stock-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.max_stock &&
+              state.errors.max_stock.map((error: string) => (
                 <p className="mt-2 text-sm text-red-500" key={error}>
                   {error}
                 </p>
@@ -116,26 +186,242 @@ export default function Form({
 
         {/* Catalog Number */}
         <div className="mb-4">
-          <label
-            htmlFor="catalog_number"
-            className="mb-2 block text-sm font-medium"
-          >
-            Catalog Number
+          <label htmlFor="sku_code" className="mb-2 block text-sm font-medium">
+            SKU Code
           </label>
           <div className="relative mt-2 rounded-md">
             <input
-              id="catalog_number"
-              name="catalog_number"
+              id="sku_code"
+              name="sku_code"
               type="text"
-              placeholder="Enter catalog number"
+              placeholder="Enter sku code"
               className="peer block w-full rounded-md border border-gray-200 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
               defaultValue=""
-              aria-describedby="catalog_number-error"
+              aria-describedby="sku_code-error"
             />
           </div>
-          <div id="catalog_number-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.catalog_number &&
-              state.errors.catalog_number.map((error: string) => (
+          <div id="sku_code-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.sku_code &&
+              state.errors.sku_code.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
+
+        {/* Product weight*/}
+        <div className="mb-4">
+          <label htmlFor="weight" className="mb-2 block text-sm font-medium">
+            Product Weight
+          </label>
+          <div className="relative mt-2 rounded-md">
+            <input
+              id="weight"
+              name="weight"
+              type="number"
+              placeholder="Enter product weight"
+              className="peer block w-full rounded-md border border-gray-200 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              defaultValue=""
+              aria-describedby="weight-error"
+            />
+          </div>
+          <div id="weight-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.weight &&
+              state.errors.weight.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
+
+        {/* Product Width */}
+        <div className="mb-4">
+          <label htmlFor="width" className="mb-2 block text-sm font-medium">
+            Product Width
+          </label>
+          <div className="relative mt-2 rounded-md">
+            <input
+              id="width"
+              name="width"
+              type="number"
+              placeholder="Enter product width"
+              className="peer block w-full rounded-md border border-gray-200 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              defaultValue=""
+              aria-describedby="width-error"
+            />
+          </div>
+          <div id="width-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.width &&
+              state.errors.width.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
+
+        {/* Product Height */}
+        <div className="mb-4">
+          <label htmlFor="height" className="mb-2 block text-sm font-medium">
+            Product Height
+          </label>
+          <div className="relative mt-2 rounded-md">
+            <input
+              id="height"
+              name="height"
+              type="number"
+              placeholder="Enter product height"
+              className="peer block w-full rounded-md border border-gray-200 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              defaultValue=""
+              aria-describedby="height-error"
+            />
+          </div>
+          <div id="height-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.height &&
+              state.errors.height.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
+
+        {/* Product depth */}
+        <div className="mb-4">
+          <label htmlFor="depth" className="mb-2 block text-sm font-medium">
+            Product Depth
+          </label>
+          <div className="relative mt-2 rounded-md">
+            <input
+              id="depth"
+              name="depth"
+              type="number"
+              placeholder="Enter product depth"
+              className="peer block w-full rounded-md border border-gray-200 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              defaultValue=""
+              aria-describedby="depth-error"
+            />
+          </div>
+          <div id="depth-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.depth &&
+              state.errors.depth.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
+
+        {/* Product Substitute */}
+        <div className="mb-4">
+          <label
+            htmlFor="substitute"
+            className="mb-2 block text-sm font-medium"
+          >
+            Product Substitute
+          </label>
+          <div className="relative mt-2 rounded-md">
+            <input
+              id="substitute"
+              name="substitute"
+              type="text"
+              placeholder="Enter product substitute"
+              className="peer block w-full rounded-md border border-gray-200 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              defaultValue=""
+              aria-describedby="substitute-error"
+            />
+          </div>
+          <div id="substitute-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.substitute &&
+              state.errors.substitute.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
+
+        {/* Product Manufacturer */}
+        <div className="mb-4">
+          <label
+            htmlFor="manufacturer"
+            className="mb-2 block text-sm font-medium"
+          >
+            Product Manufacturer
+          </label>
+          <div className="relative mt-2 rounded-md">
+            <input
+              id="manufacturer"
+              name="manufacturer"
+              type="text"
+              placeholder="Enter product manufacturer"
+              className="peer block w-full rounded-md border border-gray-200 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              defaultValue=""
+              aria-describedby="manufacturer-error"
+            />
+          </div>
+          <div id="manufacturer-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.manufacturer &&
+              state.errors.manufacturer.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
+        {/*Manufacturer Part Number*/}
+        <div className="mb-4">
+          <label
+            htmlFor="manufacturer_part_number"
+            className="mb-2 block text-sm font-medium"
+          >
+            Manufacturer Part Number
+          </label>
+          <div className="relative mt-2 rounded-md">
+            <input
+              id="manufacturer_part_number"
+              name="manufacturer_part_number"
+              type="text"
+              placeholder="Enter manufacturer part number"
+              className="peer block w-full rounded-md border border-gray-200 py-2 pl-3 text-sm outline-2 placeholder:text-gray-500"
+              defaultValue=""
+              aria-describedby="manufacturer_part_number-error"
+            />
+          </div>
+          <div
+            id="manufacturer_part_number-error"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {state.errors?.manufacturer_part_number &&
+              state.errors.manufacturer_part_number.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
+        {/* Supplier */}
+        <div className="mb-4">
+          <label htmlFor="supplier" className="mb-2 block text-sm font-medium">
+            Supplier
+          </label>
+          <select
+            id="supplier"
+            name="supplier"
+            className="block w-full rounded-md border border-gray-200 py-2 pl-3 text-sm outline-2"
+          >
+            {suppliers.map((supplier) => (
+              <option key={supplier.id} value={supplier.id}>
+                {supplier.name}
+              </option>
+            ))}
+          </select>
+          <div id="supplier-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.supplier &&
+              state.errors.supplier.map((error: string) => (
                 <p className="mt-2 text-sm text-red-500" key={error}>
                   {error}
                 </p>
@@ -149,19 +435,19 @@ export default function Form({
             Sector
           </label>
           <select
-            id="sector"
-            name="sector"
+            id="location"
+            name="location"
             className="block w-full rounded-md border border-gray-200 py-2 pl-3 text-sm outline-2"
           >
             {sectors.map((sector) => (
-              <option key={sector.id} value={sector.name}>
+              <option key={sector.id} value={sector.id}>
                 {sector.name}
               </option>
             ))}
           </select>
           <div id="sector-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.sector &&
-              state.errors.sector.map((error: string) => (
+            {state.errors?.location &&
+              state.errors.location.map((error: string) => (
                 <p className="mt-2 text-sm text-red-500" key={error}>
                   {error}
                 </p>
@@ -180,7 +466,7 @@ export default function Form({
             className="block w-full rounded-md border border-gray-200 py-2 pl-3 text-sm outline-2"
           >
             {categories.map((category) => (
-              <option key={category.id} value={category.name}>
+              <option key={category.id} value={category.id}>
                 {category.name}
               </option>
             ))}
@@ -194,73 +480,9 @@ export default function Form({
               ))}
           </div>
         </div>
-
-        {/* Components */}
-        <div className="mb-4">
-          <label
-            htmlFor="components"
-            className="mb-2 block text-sm font-medium"
-          >
-            Components
-          </label>
-          <div className="flex w-full flex-wrap gap-4 md:flex-nowrap">
-            <ProductComponentsField
-              products={products}
-              onComponentsChange={setSelectedComponents}
-            />
-          </div>
-        </div>
-        {/*status*/}
-        <div>
-          <div className="mb-2 block text-sm font-medium">Product Status</div>
-          <div className="rounded-md border border-gray-200 bg-white px-[14px] py-3">
-            <div className="flex gap-4">
-              <div className="flex items-center">
-                <input
-                  id="disabled"
-                  name="status"
-                  type="radio"
-                  value="disabled"
-                  className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
-                  aria-describedby="status-error"
-                />
-                <label
-                  htmlFor="disabled"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600"
-                >
-                  disabled <ClockIcon className="h-4 w-4" />
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  id="active"
-                  name="status"
-                  type="radio"
-                  value="active"
-                  className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
-                  aria-describedby="status-error"
-                />
-                <label
-                  htmlFor="active"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-medium text-white"
-                >
-                  Active <CheckIcon className="h-4 w-4" />
-                </label>
-              </div>
-            </div>
-          </div>
-          <div id="status-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.status &&
-              state.errors.status.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-              ))}
-          </div>
-        </div>
-
         {/* You can add a form field for components if needed */}
       </div>
+
       <div className="mt-6 flex justify-end gap-4">
         <Link
           href="/dashboard/products"
@@ -268,7 +490,7 @@ export default function Form({
         >
           Cancel
         </Link>
-        <Button type="submit">Update Product</Button>
+        <Button type="submit">Create Product</Button>
       </div>
     </form>
   );

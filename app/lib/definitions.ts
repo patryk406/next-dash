@@ -1,7 +1,3 @@
-// This file contains type definitions for your data.
-// It describes the shape of the data, and what data type each property should accept.
-// For simplicity of teaching, we're manually defining these types.
-// However, these types are generated automatically if you're using an ORM such as Prisma.
 export type User = {
   id: string;
   name: string;
@@ -9,81 +5,83 @@ export type User = {
   password: string;
 };
 
-export type Revenue = {
-  month: string;
-  revenue: number;
+export type Sector = {
+  id: string;
+  description: string;
+  name: string;
 };
 
-export type LatestInvoice = {
+export type Category = {
   id: string;
   name: string;
-  image_url: string;
-  email: string;
-  amount: string;
+  description: string;
 };
 
-// The database returns a number for amount, but we later format it to a string with the formatCurrency function
-export type LatestInvoiceRaw = Omit<LatestInvoice, 'amount'> & {
-  amount: number;
-};
-
-export type InvoicesTable = {
-  id: string;
-  customer_id: string;
-  name: string;
-  email: string;
-  image_url: string;
-  date: string;
-  amount: number;
-  status: 'pending' | 'paid';
-};
-
-export type ProductsTableType = {
+export type Supplier = {
   id: string;
   name: string;
-  stock: number;
-  sector: string;
-  category: string;
-  price: number;
-  catalog_number: string;
-  image_url: string;
-  components:
-    | {
-        id: string;
-        product_id: string;
-        component_id: string;
-        component_name: string;
-        quantity: number;
-      }[]
-    | [];
+  description: string;
 };
-export type ProductTransactionsTableType = {
+
+export type Transaction = {
   id: string;
   product_id: string;
-  type: 'in' | 'out';
-  quantity: number;
-  date: string;
+  set_id: number;
+  quantity: string;
+  created_at: string;
 };
 
-export type SectorTableType = {
+export type Image = {
+  id: string;
+  product_id: string;
+  set_id: number;
+  url: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Product = {
   id: string;
   name: string;
   description: string;
+  substitute: string;
+  price: number;
+  stock: number;
+  min_stock: number;
+  max_stock: number;
+  location_id: string;
+  height: number;
+  width: number;
+  depth: number;
+  supplier_id: string;
+  weight: number;
+  category_id: string;
+  sku_code: string;
+  manufacturer: string;
+  manufacturer_part_number: string;
+  temporary_locked: boolean;
 };
-export type CategoriesTableType = {
+
+export type Products_Set = {
   id: string;
   name: string;
   description: string;
-};
-
-export type CustomerField = {
-  id: string;
-  name: string;
-};
-
-export type InvoiceForm = {
-  id: string;
-  customer_id: string;
-  amount: number;
-  status: 'pending' | 'paid';
+  sku_code: string;
+  height: number;
+  width: number;
+  depth: number;
+  price: number;
+  stock: number;
+  location_id: string;
+  components: string;
+  working_hours: number;
+  in_development: boolean;
+  possible_quantities: number;
+  manufacturer: string;
+  manufacturer_part_number: string;
+  lead_time: number;
+  safety_stock: number;
+  status: string;
+  category_id: string;
+  temporary_locked: boolean;
 };

@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { UpdateButton, DeleteButton } from '@/app/ui/common/buttons';
 import { formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredProducts } from '@/app/lib/data';
@@ -27,24 +26,32 @@ export default async function ProductTable({
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
                     <div className="mb-2 flex items-center">
-                      <Image
-                        src="/products/placeholder.png"
-                        className="mr-2 rounded-full"
-                        width={28}
-                        height={28}
-                        alt={`${product.name}'s profile picture`}
-                      />
+                      {/*temporary disabled*/}
+                      {/*<Image*/}
+                      {/*  src="/products/placeholder.png"*/}
+                      {/*  className="mr-2 rounded-full"*/}
+                      {/*  width={28}*/}
+                      {/*  height={28}*/}
+                      {/*  alt={`${product.name}'s profile picture`}*/}
+                      {/*/>*/}
                       <p>{product.name}</p>
                     </div>
                     <p className="text-sm text-gray-500">{product.stock}</p>
-                    <p className="text-sm text-gray-500">{product.sector}</p>
-                    <p className="text-sm text-gray-500">{product.category}</p>
+                    <p className="text-sm text-gray-500">{product.min_stock}</p>
+                    <p className="text-sm text-gray-500">{product.max_stock}</p>
+                    <p className="text-sm text-gray-500">
+                      {product.temporary_locked}
+                    </p>
+                    <p className="text-sm text-gray-500">{product.height}</p>
+                    <p className="text-sm text-gray-500">{product.width}</p>
+                    <p className="text-sm text-gray-500">{product.depth}</p>
+                    <p className="text-sm text-gray-500">{product.weight}</p>
                   </div>
                 </div>
                 <div className="flex w-full items-center justify-between pt-4">
                   <div>
                     <p className="text-xl font-medium">{product.price}</p>
-                    <p>{product.catalog_number}</p>€
+                    <p>{product.sku_code}</p>€
                   </div>
                   <div className="flex justify-end gap-2">
                     <UpdateButton id={product.id} location="products" />
@@ -60,29 +67,54 @@ export default async function ProductTable({
           <table className="hidden min-w-full text-gray-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
+                {/* Add headers for the new fields here */}
                 <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
-                  Name
+                  ID
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Stock
+                  Description
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Price
+                  Substitute
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Sector
+                  Min Stack
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Category
+                  Max Stack
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Catalog ID
+                  Location ID
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Components
+                  Height
                 </th>
-                <th scope="col" className="relative py-3 pl-6 pr-3">
-                  <span className="sr-only">Edit</span>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Width
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Depth
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Supplier ID
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Weight
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Category ID
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  SKU Code
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Manufacturer
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Manufacturer Part Number
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Temporary Locked
                 </th>
               </tr>
             </thead>
@@ -95,42 +127,73 @@ export default async function ProductTable({
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <TableLinkElement id={product.id}>
                       <div className="flex items-center gap-3">
-                        <Image
-                          src="/products/placeholder.png"
-                          className="rounded-full"
-                          width={28}
-                          height={28}
-                          alt={`${product.name}'s profile picture`}
-                        />
+                        {/*<Image*/}
+                        {/*  src="/products/placeholder.png"*/}
+                        {/*  className="rounded-full"*/}
+                        {/*  width={28}*/}
+                        {/*  height={28}*/}
+                        {/*  alt={`${product.name}'s profile picture`}*/}
+                        {/*/>*/}
                         <p>{product.name}</p>
                       </div>
                     </TableLinkElement>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
+                    {product.description}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {product.substitute}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {product.price}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {product.sku_code}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
                     {product.stock}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {product.sector}
+                    {product.min_stock}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {product.category}
+                    {product.max_stock}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {product.height}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {product.width}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {product.depth}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {product.weight}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {product.temporary_locked}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {product.supplier_id}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {product.manufacturer}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {product.manufacturer_part_number}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {product.location_id}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {product.category_id}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     {formatCurrency(product.price)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {product.catalog_number}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-3">
-                    <div className="flex gap-1">
-                      {product.components.length === 0 && <p>None</p>}
-                      {product.components.length > 0 &&
-                        product?.components?.map((component) => (
-                          <p key={component?.id}>
-                            {component?.component_name} ({component?.quantity})
-                          </p>
-                        ))}
-                    </div>
+                    {product.sku_code}
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
